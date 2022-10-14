@@ -68,7 +68,6 @@ def format_response(weather):
 def get_weather(city, date):
     print(city)
     print(date)
-    city= city[:-1]
     # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
     if city != "":
         try:
@@ -95,6 +94,7 @@ def get_weather(city, date):
                 apiQuery += "&include=" + Include
             if (len(iconSet)):
                 apiQuery += "&iconSet" + iconSet
+
 
             apiQuery += "&key=" + weather_key
 
