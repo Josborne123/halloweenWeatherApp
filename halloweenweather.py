@@ -100,8 +100,6 @@ def get_weather(city, date):
             response = requests.get(apiQuery)
             weather = response.json()
 
-            ##########print(weather)
-
             label_below['text'] = format_response(weather)
         except:
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
