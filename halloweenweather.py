@@ -66,8 +66,7 @@ def format_response(weather):
     return final_str
 
 def get_weather(city, date):
-    print(city)
-    print(date)
+    date = str(date)
     # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
     if city != "":
         try:
