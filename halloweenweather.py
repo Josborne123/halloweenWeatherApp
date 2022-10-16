@@ -10,18 +10,12 @@ import tkinter.font as tk_font
 from emoji import emojize
 import csv
 import random
+import pygame
 
-
-# Setting up the customtkinter window
-window = customtkinter.CTk()
-window.geometry('750x500')
-window.title("Halloween Weather")
-window.resizable(width=False, height=False)
-customtkinter.set_default_color_theme("dark-blue")
-
-################print(tk_font.families())
-
-
+# Defining sounds arrays
+buttonSounds = ["audio/button/breezeofblood.mp3", "audio/button/goreblood.mp3", "audio/button/riptear.mp3", "audio/button/veryloudsplat.mp3"]
+failureSounds = []
+introSounds = ["audio/intro/dramaticintro.mp3", "audio/intro/halloweenimpact01.mp3", "audio/intro/halloweenimpact02.mp3", "audio/intro/halloweenimpact03.mp3", "audio/intro/halloweenimpact04.mp3", "audio/intro/halloweenimpact05.mp3"]
 
 def resize_image(event):
     # Resises the image when required
@@ -32,41 +26,44 @@ def resize_image(event):
     label.config(image = photo)
     label.image = photo
 
-## Image created by anjarshevtian on Vecteezy
-# Sets up the image
-image = Image.open('img\halloween.jpg')
-copy_of_image = image.copy()
-photo = ImageTk.PhotoImage(image)
-label = tk.Label(window, image = photo)
-label.bind('<Configure>', resize_image)
-label.pack(fill=tk.BOTH, expand = True)
-
-
-
 def format_response(weather):
     # Function which formats the weather information 
     try:
-        name = weather['resolvedAddress'] 
+        name = weather['resolvedAddress']
+        resolvedAddress = weather['resolvedAddress'] 
         date = weather['days'][0]['datetime'] # Format YYYY-MM-DD
         conditions = weather['days'][0]['conditions']
         maxtemp = weather['days'][0]['tempmax'] # In °C
         mintemp = weather['days'][0]['tempmin'] # In °C
         humidity = weather['days'][0]['humidity'] # In %
         windspeed = weather['days'][0]['windspeed'] # In mph
-
         icon = weather['days'][0]['icon']
 
-        final_str = f'Location: {name}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+        # Converting the first letter of the location name to a capital letter
+        firstChar = ord(name[0:1])
+        if firstChar > 97 and firstChar < 122:
+            firstChar -= 32
+            name = chr(firstChar) + name[1:]
+
+        dateDay = date[8:]
+        dateMonth = date[4:8]
+        dateYear = date[0:4]
+        # Converting the date format to DD-MM-YYYY
+        date = dateDay + dateMonth + dateYear
+
+        final_str = f'Location: {resolvedAddress}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
         label_below.configure(text=final_str)
     except:
         final_str = f'There was a problem retrieving that information'
         label_below.configure(text=final_str)
-
-
-    return final_str
+        pygame.mixer.music.load(random.choice(failureSounds))
+        pygame.mixer.music.play(loops=0)
 
 def get_weather(city, date):
+    pygame.mixer.music.load(random.choice(buttonSounds))
+    pygame.mixer.music.play(loops=0)
     date = str(date)
+    print(city)
     # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
     if city != "":
         try:
@@ -78,7 +75,8 @@ def get_weather(city, date):
             ContentType = 'json'
             Include = "days"
             iconSet = "icons2"
-
+            language = "en"
+            
             apiQuery = url + Location
             if (len(StartDate)):
                 apiQuery+="/"+StartDate
@@ -92,20 +90,101 @@ def get_weather(city, date):
             if (len(Include)):
                 apiQuery += "&include=" + Include
             if (len(iconSet)):
-                apiQuery += "&iconSet" + iconSet
-
+                apiQuery += "&iconSet=" + iconSet
+            if (len(language)):
+                apiQuery += "&lang=" + language
 
             apiQuery += "&key=" + weather_key
 
             response = requests.get(apiQuery)
             weather = response.json()
-
             label_below['text'] = format_response(weather)
         except:
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
+            pygame.mixer.music.load(random.choice(failureSounds))
+            pygame.mixer.music.play(loops=0)
 
+def surprise_format_response(weather):
+    # Function which formats the weather information 
+    try:
+        name = weather['address']
+        resolvedAddress = weather['resolvedAddress'] 
+        date = weather['days'][0]['datetime'] # Format YYYY-MM-DD
+        conditions = weather['days'][0]['conditions']
+        maxtemp = weather['days'][0]['tempmax'] # In °C
+        mintemp = weather['days'][0]['tempmin'] # In °C
+        humidity = weather['days'][0]['humidity'] # In %
+        windspeed = weather['days'][0]['windspeed'] # In mph
+        icon = weather['days'][0]['icon']
+
+        # Converting the first letter of the location name to Capital
+        firstChar = ord(name[0:1])
+        if firstChar > 97 and firstChar < 122:
+            firstChar -= 32
+            name = chr(firstChar) + name[1:]
+
+        dateDay = date[8:]
+        dateMonth = date[4:8]
+        dateYear = date[0:4]
+        # Converting the date format to DD-MM-YYYY
+        date = dateDay + dateMonth + dateYear
+
+        final_str = f'Location: {name}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+        label_below.configure(text=final_str)
+    except:
+        final_str = f'There was a problem retrieving that information'
+        label_below.configure(text=final_str)
+        pygame.mixer.music.load(random.choice(failureSounds))
+        pygame.mixer.music.play(loops=0)
+
+def surprise_get_weather(city, date):
+    pygame.mixer.music.load(random.choice(buttonSounds))
+    pygame.mixer.music.play(loops=0)
+    date = str(date)
+    print(city)
+    # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
+    if city != "":
+        try:
+            weather_key = 'KZWGYHQU6JZUJ6VTKLAUDH68W'
+            url = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/'
+            UnitGroup = 'uk'
+            Location = city
+            StartDate = date + "-10-31"
+            ContentType = 'json'
+            Include = "days"
+            iconSet = "icons2"
+            language = "en"
+            
+            apiQuery = url + Location
+            if (len(StartDate)):
+                apiQuery+="/"+StartDate
+
+            apiQuery+="?"
+
+            if (len(UnitGroup)):
+                apiQuery +="&unitGroup=" + UnitGroup
+            if (len(ContentType)):
+                apiQuery += "&contentType=" + ContentType 
+            if (len(Include)):
+                apiQuery += "&include=" + Include
+            if (len(iconSet)):
+                apiQuery += "&iconSet=" + iconSet
+            if (len(language)):
+                apiQuery += "&lang=" + language
+
+            apiQuery += "&key=" + weather_key
+
+            response = requests.get(apiQuery)
+            weather = response.json()
+            label_below['text'] = surprise_format_response(weather)
+        except:
+            label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
+            pygame.mixer.music.load(random.choice(failureSounds))
+            pygame.mixer.music.play(loops=0)
 
 def supriseMeProcessing():
+    pygame.mixer.music.load("audio/button/goreblood.mp3")
+    pygame.mixer.music.play(loops=0)
     countriesList = []
     countriesFile = open("countries of the world.csv", "r")
     rows = csv.reader(countriesFile)
@@ -115,8 +194,7 @@ def supriseMeProcessing():
 
     randomCountry = random.choice(countriesList)
     randomDate = random.randint(1973, 2021)
-    get_weather(randomCountry, randomDate)
-
+    surprise_get_weather(randomCountry, randomDate)
 
 def setup():
     # Function which sets up all of the entry boxes, buttons, frames, etc
@@ -124,14 +202,15 @@ def setup():
     info_label = customtkinter.CTkLabel(window, text="Find the weather for any location, from 1973 onwards", text_font=("Comic Sans MS bold", 14), text_color="white", bg_color="#f2993f")
     info_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
 
-    city_entry = customtkinter.CTkEntry(window, placeholder_text="Location", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
-    city_entry.place(relx=0.20, rely=0.16, relwidth=0.18, relheight=0.1)
+    location_entry = customtkinter.CTkEntry(window, placeholder_text="Location", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
+    location_entry.place(relx=0.20, rely=0.16, relwidth=0.18, relheight=0.1)
 
     date_entry = customtkinter.CTkEntry(window,  placeholder_text="Year", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
     date_entry.place(relx=0.40, rely=0.16, relwidth=0.18, relheight=0.1)
 
-    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(city_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd")
+    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd")
     enter_button.place(relx=0.60, rely=0.16, relwidth=0.18, relheight=0.1)
+    #window.bind('<Return>', get_weather(location_entry.get(), date_entry.get()))
 
     second_frame = customtkinter.CTkFrame(window, bg_color="#eb6835", bd=4)
     second_frame.place(relx=0.125, rely=0.35, relwidth=0.75, relheight=0.6)
@@ -151,10 +230,36 @@ def setup():
     ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", text_font=("Comic Sans MS bold", 20), bg_color="#292929")
     ghostlabel4.place(relx=0.68, rely=0.855)
 
-    return label_below
+    return label_below, second_frame
 
+
+# Main Program
+
+pygame.mixer.init()
+
+# ADD an audio file if i wan't something to play on startup
+pygame.mixer.music.load(random.choice(introSounds))
+pygame.mixer.music.play(loops=0)
+
+# Setting up the customtkinter window
+window = customtkinter.CTk()
+window.geometry('750x500')
+window.title("Halloween Weather")
+window.resizable(width=False, height=False)
+customtkinter.set_default_color_theme("dark-blue")
+
+## Image created by anjarshevtian on Vecteezy
+# Sets up the image
+image = Image.open('img\halloween.jpg')
+copy_of_image = image.copy()
+photo = ImageTk.PhotoImage(image)
+label = tk.Label(window, image = photo)
+label.bind('<Configure>', resize_image)
+label.pack(fill=tk.BOTH, expand = True)
+
+################print(tk_font.families())
 
 # Calls the setup function
-label_below = setup()
+label_below, second_frame = setup()
 # Runs the program
 window.mainloop()
