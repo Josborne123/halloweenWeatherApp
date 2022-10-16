@@ -15,7 +15,7 @@ import pygame
 # Defining sounds arrays
 buttonSounds = ["audio/button/breezeofblood.mp3", "audio/button/goreblood.mp3", "audio/button/riptear.mp3", "audio/button/veryloudsplat.mp3"]
 failureSounds = []
-introSounds = ["audio/intro/dramaticintro.mp3", "audio/intro/halloweenimpact01.mp3", "audio/intro/halloweenimpact02.mp3", "audio/intro/halloweenimpact03.mp3", "audio/intro/halloweenimpact04.mp3", "audio/intro/halloweenimpact05.mp3"]
+introSounds = ["audio/intro/dramaticintro.mp3", "audio/intro/halloweenimpact01.mp3", "audio/intro/halloweenimpact02.mp3", "audio/intro/halloweenimpact03.mp3", "audio/intro/halloweenimpact04.mp3", "audio/intro/halloweenimpact05.mp3", "audio/intro/bellofdeath.mp3"]
 
 def resize_image(event):
     # Resises the image when required
@@ -63,7 +63,6 @@ def get_weather(city, date):
     pygame.mixer.music.load(random.choice(buttonSounds))
     pygame.mixer.music.play(loops=0)
     date = str(date)
-    print(city)
     # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
     if city != "":
         try:
@@ -141,7 +140,6 @@ def surprise_get_weather(city, date):
     pygame.mixer.music.load(random.choice(buttonSounds))
     pygame.mixer.music.play(loops=0)
     date = str(date)
-    print(city)
     # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
     if city != "":
         try:
