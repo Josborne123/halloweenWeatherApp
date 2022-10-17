@@ -14,6 +14,7 @@ import pygame
 
 # Defining sounds arrays
 buttonSounds = ["audio/button/breezeofblood.mp3", "audio/button/goreblood.mp3", "audio/button/riptear.mp3", "audio/button/veryloudsplat.mp3"]
+screamingSounds = ["audio\screamingsounds\demonic-woman-scream-6333.mp3", "audio\screamingsounds\evil-shreik-45560.mp3", "audio\screamingsounds\girl_scream_shortwav-14510.mp3", "audio\screamingsounds\man-scream-memes-121085.mp3", "audio\screamingsounds\panic-stricken-screaming-1-6880.mp3", "audio\screamingsounds\witch-laugh-95203.mp3", "audio\screamingsounds\witchlaughter-1-100652.mp3"]
 failureSounds = []
 introSounds = ["audio/intro/dramaticintro.mp3", "audio/intro/halloweenimpact01.mp3", "audio/intro/halloweenimpact02.mp3", "audio/intro/halloweenimpact03.mp3", "audio/intro/halloweenimpact04.mp3", "audio/intro/halloweenimpact05.mp3", "audio/intro/bellofdeath.mp3"]
 
@@ -26,10 +27,10 @@ def resize_image(event):
     label.config(image = photo)
     label.image = photo
 
-def format_response(weather):
+def format_response(address, weather):
     # Function which formats the weather information 
     try:
-        name = weather['resolvedAddress']
+        name = weather['address']
         resolvedAddress = weather['resolvedAddress'] 
         date = weather['days'][0]['datetime'] # Format YYYY-MM-DD
         conditions = weather['days'][0]['conditions']
@@ -51,7 +52,12 @@ def format_response(weather):
         # Converting the date format to DD-MM-YYYY
         date = dateDay + dateMonth + dateYear
 
-        final_str = f'Location: {resolvedAddress}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+        if address == True:
+            final_str = f'Location: {name}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+        elif address == False:
+            final_str = f'Location: {resolvedAddress}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+
+        # Setting the label to the fiinal_str
         label_below.configure(text=final_str)
     except:
         final_str = f'There was a problem retrieving that information'
@@ -59,8 +65,8 @@ def format_response(weather):
         pygame.mixer.music.load(random.choice(failureSounds))
         pygame.mixer.music.play(loops=0)
 
-def get_weather(city, date):
-    pygame.mixer.music.load(random.choice(buttonSounds))
+def get_weather(surprise, city, date):
+    pygame.mixer.music.load(random.choice(screamingSounds))
     pygame.mixer.music.play(loops=0)
     date = str(date)
     # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
@@ -97,84 +103,13 @@ def get_weather(city, date):
 
             response = requests.get(apiQuery)
             weather = response.json()
-            label_below['text'] = format_response(weather)
-        except:
-            label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
-            pygame.mixer.music.load(random.choice(failureSounds))
-            pygame.mixer.music.play(loops=0)
+            if surprise == False:
+                address = False
+                label_below['text'] = format_response(address, weather)
+            elif surprise == True:
+                address = True
+                label_below['text'] = format_response(address, weather)
 
-def surprise_format_response(weather):
-    # Function which formats the weather information 
-    try:
-        name = weather['address']
-        resolvedAddress = weather['resolvedAddress'] 
-        date = weather['days'][0]['datetime'] # Format YYYY-MM-DD
-        conditions = weather['days'][0]['conditions']
-        maxtemp = weather['days'][0]['tempmax'] # In °C
-        mintemp = weather['days'][0]['tempmin'] # In °C
-        humidity = weather['days'][0]['humidity'] # In %
-        windspeed = weather['days'][0]['windspeed'] # In mph
-        icon = weather['days'][0]['icon']
-
-        # Converting the first letter of the location name to Capital
-        firstChar = ord(name[0:1])
-        if firstChar > 97 and firstChar < 122:
-            firstChar -= 32
-            name = chr(firstChar) + name[1:]
-
-        dateDay = date[8:]
-        dateMonth = date[4:8]
-        dateYear = date[0:4]
-        # Converting the date format to DD-MM-YYYY
-        date = dateDay + dateMonth + dateYear
-
-        final_str = f'Location: {name}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
-        label_below.configure(text=final_str)
-    except:
-        final_str = f'There was a problem retrieving that information'
-        label_below.configure(text=final_str)
-        pygame.mixer.music.load(random.choice(failureSounds))
-        pygame.mixer.music.play(loops=0)
-
-def surprise_get_weather(city, date):
-    pygame.mixer.music.load(random.choice(buttonSounds))
-    pygame.mixer.music.play(loops=0)
-    date = str(date)
-    # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
-    if city != "":
-        try:
-            weather_key = 'KZWGYHQU6JZUJ6VTKLAUDH68W'
-            url = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/'
-            UnitGroup = 'uk'
-            Location = city
-            StartDate = date + "-10-31"
-            ContentType = 'json'
-            Include = "days"
-            iconSet = "icons2"
-            language = "en"
-            
-            apiQuery = url + Location
-            if (len(StartDate)):
-                apiQuery+="/"+StartDate
-
-            apiQuery+="?"
-
-            if (len(UnitGroup)):
-                apiQuery +="&unitGroup=" + UnitGroup
-            if (len(ContentType)):
-                apiQuery += "&contentType=" + ContentType 
-            if (len(Include)):
-                apiQuery += "&include=" + Include
-            if (len(iconSet)):
-                apiQuery += "&iconSet=" + iconSet
-            if (len(language)):
-                apiQuery += "&lang=" + language
-
-            apiQuery += "&key=" + weather_key
-
-            response = requests.get(apiQuery)
-            weather = response.json()
-            label_below['text'] = surprise_format_response(weather)
         except:
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
             pygame.mixer.music.load(random.choice(failureSounds))
@@ -192,7 +127,8 @@ def supriseMeProcessing():
 
     randomCountry = random.choice(countriesList)
     randomDate = random.randint(1973, 2021)
-    surprise_get_weather(randomCountry, randomDate)
+    surprise = True
+    get_weather(surprise, randomCountry, randomDate)
 
 def setup():
     # Function which sets up all of the entry boxes, buttons, frames, etc
@@ -206,7 +142,8 @@ def setup():
     date_entry = customtkinter.CTkEntry(window,  placeholder_text="Year", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
     date_entry.place(relx=0.40, rely=0.16, relwidth=0.18, relheight=0.1)
 
-    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd")
+    surprise = False
+    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(surprise, location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd")
     enter_button.place(relx=0.60, rely=0.16, relwidth=0.18, relheight=0.1)
     #window.bind('<Return>', get_weather(location_entry.get(), date_entry.get()))
 
