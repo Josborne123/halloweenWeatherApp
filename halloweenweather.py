@@ -1,15 +1,11 @@
 # Importing all modules required
-from datetime import date
-from pydoc import resolve
 import tkinter as tk
-from types import resolve_bases
 import customtkinter
 import requests
 from PIL import ImageTk, Image
 import csv
 import random
 import pygame
-import turtle
 
 # Defining sounds arrays
 buttonSounds = ["audio/button/breezeofblood.mp3", "audio/button/goreblood.mp3", "audio/button/riptear.mp3", "audio/button/veryloudsplat.mp3"]
@@ -45,6 +41,9 @@ def format_response(address, weather):
         print(length)
         if length >= 43:
             label_below.configure(font=("Comic Sans MS bold", 14))
+        elif length <= 43:
+            label_below.configure(font=("Comic Sans MS bold", 16))
+
 
         # Converting the first letter of the location name to a capital letter
         firstChar = ord(name[0:1])
