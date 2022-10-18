@@ -7,6 +7,7 @@ from PIL import ImageTk, Image
 import csv
 import random
 import pygame
+import turtle
 
 # Defining sounds arrays
 buttonSounds = ["audio/button/breezeofblood.mp3", "audio/button/goreblood.mp3", "audio/button/riptear.mp3", "audio/button/veryloudsplat.mp3"]
@@ -46,12 +47,12 @@ def format_response(address, weather):
         dateMonth = date[4:8]
         dateYear = date[0:4]
         # Converting the date format to DD-MM-YYYY
-        date = dateDay + dateMonth + dateYear
+        dateFormatted = dateDay + dateMonth + dateYear
 
         if address == True:
-            final_str = f'Location: {name}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+            final_str = f'Location: {name}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
         elif address == False:
-            final_str = f'Location: {resolvedAddress}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+            final_str = f'Location: {resolvedAddress}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
 
         # Setting the label to the final_str
         label_below.configure(text=final_str)
@@ -62,12 +63,14 @@ def format_response(address, weather):
         pygame.mixer.music.play(loops=0)
 
 def get_weather(surprise, city, date):
-    print(city)
-    # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
+    # Procedure which connects to the Visual Crossing Timeline API and stores the response in 'weather'
+    dateInt = int(date)
     date = str(date)
 
     if city != "":
         try:
+            if dateInt < 1973 or dateInt > 2021:
+                raise Exception
 
             weather_key = 'KZWGYHQU6JZUJ6VTKLAUDH68W'
             url = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/'
@@ -107,6 +110,37 @@ def get_weather(surprise, city, date):
                 address = True
                 label_below['text'] = format_response(address, weather)
 
+            # Moves the ghost anti-clockwise
+            def movement():
+                def one(y=0.37, x=0.135):
+                    if y < 0.862:
+                        ghostlabel1.place(relx=x, rely=y)
+                        window.after(30, one, y+0.01)
+                def two(x=0.815, y=0.36):
+                    if x > 0.13:
+                        ghostlabel2.configure(anchor="nw")
+                        ghostlabel2.place(relx=x, rely=y)
+                        window.after(22, two, x-0.01)
+
+                def three(x=0.135, y=0.855):
+                    if x <= 0.82:
+                        ghostlabel3.configure(anchor="se")
+                        ghostlabel3.place(relx=x, rely=y)
+                        window.after(22, three, x+0.01)
+
+                def four(y=0.855, x=0.815):
+                    if y > 0.36:
+                        ghostlabel4.configure(anchor="ne")
+                        ghostlabel4.place(relx=x, rely=y)
+                        window.after(30, four, y-0.01)
+                        
+                one()
+                two()
+                three()
+                four()
+
+            movement()
+
             pygame.mixer.music.load(random.choice(screamingSounds)) # Loading sounds
             pygame.mixer.music.play(loops=0) # Playing sound
 
@@ -116,6 +150,9 @@ def get_weather(surprise, city, date):
             pygame.mixer.music.play(loops=0)
 
 def supriseMeProcessing():
+    location_entry.delete(0, 'end')
+    date_entry.delete(0, 'end')
+    window.focus()
     pygame.mixer.music.load("audio/button/goreblood.mp3") # Load music
     pygame.mixer.music.play(loops=0) # Play music
     # Function which reads in all the countries form the 'countries of the world.csv' file and then picks and stores a random country and date
@@ -160,16 +197,17 @@ def setup():
     supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", text_font=("Comic Sans MS bold", 10))
     supriseme_button.place(relx=0.42, rely=0.08, relwidth=0.14, relheight=0.07)
 
-    ghostlabel1 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="nw", text_font=("Comic Sans MS bold", 20), bg_color="#292929")
-    ghostlabel1.place(relx=0.135, rely=0.37)
-    ghostlabel2 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="ne", text_font=("Comic Sans MS bold", 20), bg_color="#292929")
-    ghostlabel2.place(relx=0.68, rely=0.37)
-    ghostlabel3 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="sw", text_font=("Comic Sans MS bold", 20), bg_color="#292929")
-    ghostlabel3.place(relx=0.135, rely=0.855)
-    ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", text_font=("Comic Sans MS bold", 20), bg_color="#292929")
-    ghostlabel4.place(relx=0.68, rely=0.855)
 
-    return label_below, second_frame, surprise, location_entry, date_entry
+    ghostlabel1 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="nw", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
+    ghostlabel1.place(relx=0.135, rely=0.37)
+    ghostlabel2 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="ne", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
+    ghostlabel2.place(relx=0.815, rely=0.36)
+    ghostlabel3 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="sw", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
+    ghostlabel3.place(relx=0.135, rely=0.855)
+    ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
+    ghostlabel4.place(relx=0.815, rely=0.855)
+
+    return label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4
 
 
 # Main Program
@@ -199,7 +237,7 @@ label.pack(fill=tk.BOTH, expand = True)
 ################print(tk_font.families())
 
 # Calls the setup function
-label_below, second_frame, surprise, location_entry, date_entry = setup()
+label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4 = setup()
 
 
 
