@@ -1,13 +1,9 @@
 # Importing all modules required
+from datetime import date
 import tkinter as tk
-from tkinter import font
+import customtkinter
 import requests
 from PIL import ImageTk, Image
-import customtkinter
-from dataclasses import dataclass
-from tkinter.font import Font
-import tkinter.font as tk_font
-from emoji import emojize
 import csv
 import random
 import pygame
@@ -57,7 +53,7 @@ def format_response(address, weather):
         elif address == False:
             final_str = f'Location: {resolvedAddress}\nDate: {date} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
 
-        # Setting the label to the fiinal_str
+        # Setting the label to the final_str
         label_below.configure(text=final_str)
     except:
         final_str = f'There was a problem retrieving that information'
@@ -66,12 +62,13 @@ def format_response(address, weather):
         pygame.mixer.music.play(loops=0)
 
 def get_weather(surprise, city, date):
-    pygame.mixer.music.load(random.choice(screamingSounds))
-    pygame.mixer.music.play(loops=0)
-    date = str(date)
+    print(city)
     # Procedure which connects to the API (visual crossing) and stores the response in 'weather'
+    date = str(date)
+
     if city != "":
         try:
+
             weather_key = 'KZWGYHQU6JZUJ6VTKLAUDH68W'
             url = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/'
             UnitGroup = 'uk'
@@ -110,14 +107,18 @@ def get_weather(surprise, city, date):
                 address = True
                 label_below['text'] = format_response(address, weather)
 
+            pygame.mixer.music.load(random.choice(screamingSounds)) # Loading sounds
+            pygame.mixer.music.play(loops=0) # Playing sound
+
         except:
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
             pygame.mixer.music.load(random.choice(failureSounds))
             pygame.mixer.music.play(loops=0)
 
 def supriseMeProcessing():
-    pygame.mixer.music.load("audio/button/goreblood.mp3")
-    pygame.mixer.music.play(loops=0)
+    pygame.mixer.music.load("audio/button/goreblood.mp3") # Load music
+    pygame.mixer.music.play(loops=0) # Play music
+    # Function which reads in all the countries form the 'countries of the world.csv' file and then picks and stores a random country and date
     countriesList = []
     countriesFile = open("countries of the world.csv", "r")
     rows = csv.reader(countriesFile)
@@ -133,19 +134,22 @@ def supriseMeProcessing():
 def setup():
     # Function which sets up all of the entry boxes, buttons, frames, etc
 
+    surprise = False
+
     info_label = customtkinter.CTkLabel(window, text="Find the weather for any location, from 1973 onwards", text_font=("Comic Sans MS bold", 14), text_color="white", bg_color="#f2993f")
     info_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
 
     location_entry = customtkinter.CTkEntry(window, placeholder_text="Location", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
     location_entry.place(relx=0.20, rely=0.16, relwidth=0.18, relheight=0.1)
+    location_entry.bind("<Return>", (lambda event: get_weather(surprise, location_entry.get(), date_entry.get())))
 
     date_entry = customtkinter.CTkEntry(window,  placeholder_text="Year", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
     date_entry.place(relx=0.40, rely=0.16, relwidth=0.18, relheight=0.1)
+    date_entry.bind("<Return>", (lambda event: get_weather(surprise, location_entry.get(), date_entry.get())))
 
-    surprise = False
+
     enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(surprise, location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd")
     enter_button.place(relx=0.60, rely=0.16, relwidth=0.18, relheight=0.1)
-    #window.bind('<Return>', get_weather(location_entry.get(), date_entry.get()))
 
     second_frame = customtkinter.CTkFrame(window, bg_color="#eb6835", bd=4)
     second_frame.place(relx=0.125, rely=0.35, relwidth=0.75, relheight=0.6)
@@ -165,7 +169,7 @@ def setup():
     ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", text_font=("Comic Sans MS bold", 20), bg_color="#292929")
     ghostlabel4.place(relx=0.68, rely=0.855)
 
-    return label_below, second_frame
+    return label_below, second_frame, surprise, location_entry, date_entry
 
 
 # Main Program
@@ -195,6 +199,9 @@ label.pack(fill=tk.BOTH, expand = True)
 ################print(tk_font.families())
 
 # Calls the setup function
-label_below, second_frame = setup()
-# Runs the program
+label_below, second_frame, surprise, location_entry, date_entry = setup()
+
+
+
+# Starts the program
 window.mainloop()
