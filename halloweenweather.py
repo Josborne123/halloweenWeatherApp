@@ -1,6 +1,8 @@
 # Importing all modules required
 from datetime import date
+from pydoc import resolve
 import tkinter as tk
+from types import resolve_bases
 import customtkinter
 import requests
 from PIL import ImageTk, Image
@@ -37,6 +39,13 @@ def format_response(address, weather):
         windspeed = weather['days'][0]['windspeed'] # In mph
         icon = weather['days'][0]['icon']
 
+
+        # Ensuring that the text will fit on the screen.
+        length = len(resolvedAddress)
+        print(length)
+        if length >= 43:
+            label_below.configure(font=("Comic Sans MS bold", 14))
+
         # Converting the first letter of the location name to a capital letter
         firstChar = ord(name[0:1])
         if firstChar > 97 and firstChar < 122:
@@ -48,11 +57,13 @@ def format_response(address, weather):
         dateYear = date[0:4]
         # Converting the date format to DD-MM-YYYY
         dateFormatted = dateDay + dateMonth + dateYear
+       
 
         if address == True:
             final_str = f'Location: {name}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
         elif address == False:
             final_str = f'Location: {resolvedAddress}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+
 
         # Setting the label to the final_str
         label_below.configure(text=final_str)
@@ -99,7 +110,7 @@ def get_weather(surprise, city, date):
             if (len(language)):
                 apiQuery += "&lang=" + language
 
-            apiQuery += "&key=" + weather_key
+            apiQuery += "&key=" + weather_key # Finished api query
 
             response = requests.get(apiQuery)
             weather = response.json()
@@ -238,7 +249,6 @@ label.pack(fill=tk.BOTH, expand = True)
 
 # Calls the setup function
 label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4 = setup()
-
 
 
 # Starts the program
