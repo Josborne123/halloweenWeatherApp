@@ -1,5 +1,6 @@
 # Importing all modules required
 import tkinter as tk
+from turtle import bgcolor
 import customtkinter
 import requests
 from PIL import ImageTk, Image
@@ -10,7 +11,7 @@ import pygame
 # Defining sounds arrays
 buttonSounds = ["audio/button/breezeofblood.mp3", "audio/button/goreblood.mp3", "audio/button/riptear.mp3", "audio/button/veryloudsplat.mp3"]
 screamingSounds = ["audio\screamingsounds\demonic-woman-scream-6333.mp3", "audio\screamingsounds\evil-shreik-45560.mp3", "audio\screamingsounds\girl_scream_shortwav-14510.mp3", "audio\screamingsounds\man-scream-memes-121085.mp3", "audio\screamingsounds\panic-stricken-screaming-1-6880.mp3", "audio\screamingsounds\witch-laugh-95203.mp3", "audio\screamingsounds\witchlaughter-1-100652.mp3"]
-failureSounds = []
+failureSounds = ["audio/failure/dundundun.mp3"]
 introSounds = ["audio/intro/dramaticintro.mp3", "audio/intro/halloweenimpact01.mp3", "audio/intro/halloweenimpact02.mp3", "audio/intro/halloweenimpact03.mp3", "audio/intro/halloweenimpact04.mp3", "audio/intro/halloweenimpact05.mp3", "audio/intro/bellofdeath.mp3"]
 
 def resize_image(event):
@@ -35,14 +36,16 @@ def format_response(address, weather):
         windspeed = weather['days'][0]['windspeed'] # In mph
         icon = weather['days'][0]['icon']
 
-
         # Ensuring that the text will fit on the screen.
         length = len(resolvedAddress)
-        print(length)
-        if length >= 43:
+        if length >= 43 and length <= 46:
             label_below.configure(font=("Comic Sans MS bold", 14))
         elif length <= 43:
             label_below.configure(font=("Comic Sans MS bold", 16))
+        elif length >= 47 and length <= 52:
+            label_below.configure(font=("Comic Sans MS bold", 13))
+        elif length >= 53:
+            label_below.configure(font=("Comic Sans MS bold", 10))
 
 
         # Converting the first letter of the location name to a capital letter
@@ -67,14 +70,20 @@ def format_response(address, weather):
         # Setting the label to the final_str
         label_below.configure(text=final_str)
     except:
-        final_str = f'There was a problem retrieving that information'
+        final_str = f'Sorry, there was a problem retrieving that information'
         label_below.configure(text=final_str)
         pygame.mixer.music.load(random.choice(failureSounds))
         pygame.mixer.music.play(loops=0)
 
 def get_weather(surprise, city, date):
     # Procedure which connects to the Visual Crossing Timeline API and stores the response in 'weather'
-    dateInt = int(date)
+    try:
+        dateInt = int(date)
+    except:
+        label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
+        pygame.mixer.music.load(random.choice(failureSounds))
+        pygame.mixer.music.play(loops=0)
+
     date = str(date)
 
     if city != "":
@@ -120,8 +129,8 @@ def get_weather(surprise, city, date):
                 address = True
                 label_below['text'] = format_response(address, weather)
 
-            # Moves the ghost anti-clockwise
-            def movement():
+            # Ghosts will move in an anti-clockwise direction
+            def anticlockwise():
                 def one(y=0.37, x=0.135):
                     if y < 0.862:
                         ghostlabel1.place(relx=x, rely=y)
@@ -149,7 +158,37 @@ def get_weather(surprise, city, date):
                 three()
                 four()
 
-            movement()
+            # Ghosts will move in a clockwise direction
+            def clockwise():
+                def one( x=0.135, y=0.36):
+                    if x < 0.82:
+                        ghostlabel1.place(relx=x, rely=y)
+                        window.after(22, one, x+0.01)
+                    
+                def two(y=0.36, x=0.815):
+                    if y < 0.865:
+                        ghostlabel2.place(relx=x, rely=y)
+                        window.after(30, two, y+0.01)
+
+                def three(y=0.855, x=0.135):
+                    if y > 0.36:
+                        ghostlabel3.place(relx=x, rely=y)
+                        window.after(30, three, y-0.01)
+
+
+                def four(x=0.815, y=0.855):
+                    if x > 0.13:
+                        ghostlabel4.place(relx=x, rely=y)
+                        window.after(22, four, x-0.01)
+                        
+                one()
+                two()
+                three()
+                four()
+
+            # Randomly picks whether the ghosts go in a clockwise or anticlockwise direction
+            fns = [clockwise, anticlockwise]
+            random.choice(fns)()
 
             pygame.mixer.music.load(random.choice(screamingSounds)) # Loading sounds
             pygame.mixer.music.play(loops=0) # Playing sound
@@ -158,6 +197,11 @@ def get_weather(surprise, city, date):
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
             pygame.mixer.music.load(random.choice(failureSounds))
             pygame.mixer.music.play(loops=0)
+    
+    elif city == "":
+            label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
+            pygame.mixer.music.load(random.choice(failureSounds))
+            pygame.mixer.music.play(loops=0)  
 
 def supriseMeProcessing():
     location_entry.delete(0, 'end')
@@ -178,6 +222,15 @@ def supriseMeProcessing():
     surprise = True
     get_weather(surprise, randomCountry, randomDate)
 
+
+def mute_switch():
+    # If the switch is checked the sounds will be muted if it is unchecked the sound effects will be hearable
+    value = switch.get()
+    if value == 1:
+        pygame.mixer.music.set_volume(0)
+    elif value == 0:
+        pygame.mixer.music.set_volume(1)
+
 def setup():
     # Function which sets up all of the entry boxes, buttons, frames, etc
 
@@ -195,7 +248,7 @@ def setup():
     date_entry.bind("<Return>", (lambda event: get_weather(surprise, location_entry.get(), date_entry.get())))
 
 
-    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(surprise, location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd")
+    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(surprise, location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", hover_color="#a589e8")
     enter_button.place(relx=0.60, rely=0.16, relwidth=0.18, relheight=0.1)
 
     second_frame = customtkinter.CTkFrame(window, bg_color="#eb6835", bd=4)
@@ -204,27 +257,35 @@ def setup():
     label_below = customtkinter.CTkLabel(second_frame, anchor="center", borderwidth=4, text="", text_font=("Comic Sans MS bold", 16))
     label_below.place(relwidth=1, relheight=1)
 
-    supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", text_font=("Comic Sans MS bold", 10))
+    supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", text_font=("Comic Sans MS bold", 10), hover_color="#a589e8")
     supriseme_button.place(relx=0.42, rely=0.08, relwidth=0.14, relheight=0.07)
 
 
     ghostlabel1 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="nw", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
-    ghostlabel1.place(relx=0.135, rely=0.37)
+    ghostlabel1.place(relx=0.135, rely=0.36) # Top left
     ghostlabel2 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="ne", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
-    ghostlabel2.place(relx=0.815, rely=0.36)
+    ghostlabel2.place(relx=0.815, rely=0.36) # Top right
     ghostlabel3 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="sw", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
-    ghostlabel3.place(relx=0.135, rely=0.855)
+    ghostlabel3.place(relx=0.135, rely=0.855) # Bottom left
     ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
-    ghostlabel4.place(relx=0.815, rely=0.855)
+    ghostlabel4.place(relx=0.815, rely=0.855) # Bottom right
 
-    return label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4
+    switch = customtkinter.CTkSwitch(window, text="Mute", command=mute_switch, text_font=("Comic Sans MS bold", 11), bg_color="#e88b2e", button_color="#6c43cd", fg_color="#b8d2d4", button_hover_color="#a589e8")
+    """
+    CHANGE THE COLOR OF THE SWITCH WHEN THE SWITCH IS CHECKED FROM BLUE TO A COLOUR SLIGHTLY DARKER THAN #b8d2d4 (delete this when done)
+    
+    if there is no fix then I could just create a label with the text "Mute" and place it right next to the button, correctly alligned
 
+    """
+    switch.place(relx=0.11, rely=0.21, anchor="center")
+
+    return label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch
 
 # Main Program
 
 pygame.mixer.init()
 
-# ADD an audio file if i wan't something to play on startup
+# ADD an audio file if i want something to play on startup
 pygame.mixer.music.load(random.choice(introSounds))
 pygame.mixer.music.play(loops=0)
 
@@ -244,10 +305,8 @@ label = tk.Label(window, image = photo)
 label.bind('<Configure>', resize_image)
 label.pack(fill=tk.BOTH, expand = True)
 
-################print(tk_font.families())
-
 # Calls the setup function
-label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4 = setup()
+label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch = setup()
 
 
 # Starts the program
