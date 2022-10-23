@@ -26,6 +26,18 @@ def resize_image(event):
 def format_response(address, weather):
     # Function which formats the weather information 
     try:
+        def iconset(icon):
+            # Function which will get the icon and display it depending on the weather conditions
+            iconpath = f'2ndSetColorPNG/{icon}.png'
+            iconimage = Image.open(iconpath)
+            resizeIconImage = iconimage.resize((60,60))
+            global iconphoto
+            iconphoto = ImageTk.PhotoImage(resizeIconImage)
+            global iconlabel
+            iconlabel = tk.Label(second_frame, image = iconphoto)
+            iconlabel.place(relx=0.88, rely=0.5, anchor="center")
+            
+
         name = weather['address']
         resolvedAddress = weather['resolvedAddress'] 
         date = weather['days'][0]['datetime'] # Format YYYY-MM-DD
@@ -35,6 +47,7 @@ def format_response(address, weather):
         humidity = weather['days'][0]['humidity'] # In %
         windspeed = weather['days'][0]['windspeed'] # In mph
         icon = weather['days'][0]['icon']
+
 
         # Ensuring that the text will fit on the screen.
         length = len(resolvedAddress)
@@ -60,22 +73,28 @@ def format_response(address, weather):
         # Converting the date format to DD-MM-YYYY
         dateFormatted = dateDay + dateMonth + dateYear
        
-
         if address == True:
             final_str = f'Location: {name}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
         elif address == False:
             final_str = f'Location: {resolvedAddress}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
 
-
         # Setting the label to the final_str
         label_below.configure(text=final_str)
+        iconset(icon)
     except:
-        final_str = f'Sorry, there was a problem retrieving that information'
+        iconlabel.destroy()
+        final_str = 'Sorry, there was a problem retrieving that information'
+        label_below.configure(font=("Comic Sans MS bold", 14))
         label_below.configure(text=final_str)
         pygame.mixer.music.load(random.choice(failureSounds))
         pygame.mixer.music.play(loops=0)
 
+
+    return icon
+
 def get_weather(surprise, city, date):
+    print(city)
+    print(date)
     # Procedure which connects to the Visual Crossing Timeline API and stores the response in 'weather'
     try:
         dateInt = int(date)
@@ -194,11 +213,13 @@ def get_weather(surprise, city, date):
             pygame.mixer.music.play(loops=0) # Playing sound
 
         except:
+            iconlabel.destroy()
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
             pygame.mixer.music.load(random.choice(failureSounds))
             pygame.mixer.music.play(loops=0)
     
     elif city == "":
+            iconlabel.destroy()
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
             pygame.mixer.music.load(random.choice(failureSounds))
             pygame.mixer.music.play(loops=0)  
@@ -222,14 +243,16 @@ def supriseMeProcessing():
     surprise = True
     get_weather(surprise, randomCountry, randomDate)
 
-
 def mute_switch():
     # If the switch is checked the sounds will be muted if it is unchecked the sound effects will be hearable
     value = switch.get()
+    
     if value == 1:
         pygame.mixer.music.set_volume(0)
+        switchtext.configure(text="Audio off")
     elif value == 0:
         pygame.mixer.music.set_volume(1)
+        switchtext.configure(text="Audio on")
 
 def setup():
     # Function which sets up all of the entry boxes, buttons, frames, etc
@@ -248,7 +271,7 @@ def setup():
     date_entry.bind("<Return>", (lambda event: get_weather(surprise, location_entry.get(), date_entry.get())))
 
 
-    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(surprise, location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", hover_color="#a589e8")
+    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(surprise, location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", hover_color="#a589e8", border_width=2)
     enter_button.place(relx=0.60, rely=0.16, relwidth=0.18, relheight=0.1)
 
     second_frame = customtkinter.CTkFrame(window, bg_color="#eb6835", bd=4)
@@ -257,7 +280,7 @@ def setup():
     label_below = customtkinter.CTkLabel(second_frame, anchor="center", borderwidth=4, text="", text_font=("Comic Sans MS bold", 16))
     label_below.place(relwidth=1, relheight=1)
 
-    supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", text_font=("Comic Sans MS bold", 10), hover_color="#a589e8")
+    supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", text_font=("Comic Sans MS bold", 10), hover_color="#a589e8", border_width=2)
     supriseme_button.place(relx=0.42, rely=0.08, relwidth=0.14, relheight=0.07)
 
 
@@ -270,16 +293,20 @@ def setup():
     ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
     ghostlabel4.place(relx=0.815, rely=0.855) # Bottom right
 
-    switch = customtkinter.CTkSwitch(window, text="Mute", command=mute_switch, text_font=("Comic Sans MS bold", 11), bg_color="#e88b2e", button_color="#6c43cd", fg_color="#b8d2d4", button_hover_color="#a589e8")
-    """
-    CHANGE THE COLOR OF THE SWITCH WHEN THE SWITCH IS CHECKED FROM BLUE TO A COLOUR SLIGHTLY DARKER THAN #b8d2d4 (delete this when done)
-    
-    if there is no fix then I could just create a label with the text "Mute" and place it right next to the button, correctly alligned
 
-    """
-    switch.place(relx=0.11, rely=0.21, anchor="center")
+    #switchframe = customtkinter.CTkFrame(window, width=100, height=40, corner_radius=10)
+    #switchframe.place(relx=0.05, rely=0.17)
+    #switch = customtkinter.CTkSwitch(switchframe, text="", command=mute_switch, text_font=("Comic Sans MS bold", 11), button_color="#6c43cd", fg_color="#b8d2d4", button_hover_color="#a589e8", progress_color="#b8d2d4", height=17)
+    #switch.place(relx=0.23, rely=0.58, anchor="center")
+    #switchtext = customtkinter.CTkLabel(switchframe, text="Audio on", text_font=("Comic Sans MS bold", 10), width=10)
+    #switchtext.place(relx=0.68, rely=0.5, anchor="center")
+    switch = customtkinter.CTkSwitch(window, text="", command=mute_switch, text_font=("Comic Sans MS bold", 11), button_color="#6c43cd", fg_color="#b8d2d4", button_hover_color="#a589e8", progress_color="#9fb3b5", height=20, width=40, bg_color="#e88b2e", border_color="#ba91ff")
+    switch.place(relx=0.13, rely=0.19, anchor="center")
+    switchtext = customtkinter.CTkLabel(window, text="Audio on", text_font=("Comic Sans MS bold", 10), width=60, fg_color="#926ee6", bg_color="#f2993f", corner_radius=15)
+    switchtext.place(relx=0.13, rely=0.243, anchor="center")
 
-    return label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch
+
+    return label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch, switchtext
 
 # Main Program
 
@@ -306,8 +333,7 @@ label.bind('<Configure>', resize_image)
 label.pack(fill=tk.BOTH, expand = True)
 
 # Calls the setup function
-label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch = setup()
-
+label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch, switchtext = setup()
 
 # Starts the program
 window.mainloop()
