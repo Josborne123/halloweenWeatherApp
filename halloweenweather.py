@@ -310,6 +310,8 @@ def setup():
 
 # Main Program
 
+
+
 pygame.mixer.init()
 
 # ADD an audio file if i want something to play on startup
@@ -331,6 +333,10 @@ photo = ImageTk.PhotoImage(image)
 label = tk.Label(window, image = photo)
 label.bind('<Configure>', resize_image)
 label.pack(fill=tk.BOTH, expand = True)
+
+image50 = Image.open('img\ghost.png')
+photo50 = ImageTk.PhotoImage(image50)
+window.iconphoto(False,photo50)
 
 # Calls the setup function
 label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch, switchtext = setup()
