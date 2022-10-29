@@ -1,6 +1,7 @@
 # Importing all modules required
+from email.mime import audio
+from secrets import randbelow
 import tkinter as tk
-from turtle import bgcolor
 import customtkinter
 import requests
 from PIL import ImageTk, Image
@@ -11,11 +12,11 @@ import pygame
 # Defining sounds arrays
 buttonSounds = ["audio/button/breezeofblood.mp3", "audio/button/goreblood.mp3", "audio/button/riptear.mp3", "audio/button/veryloudsplat.mp3"]
 screamingSounds = ["audio\screamingsounds\demonic-woman-scream-6333.mp3", "audio\screamingsounds\evil-shreik-45560.mp3", "audio\screamingsounds\girl_scream_shortwav-14510.mp3", "audio\screamingsounds\man-scream-memes-121085.mp3", "audio\screamingsounds\panic-stricken-screaming-1-6880.mp3", "audio\screamingsounds\witch-laugh-95203.mp3", "audio\screamingsounds\witchlaughter-1-100652.mp3"]
-failureSounds = ["audio/failure/dundundun.mp3"]
+failureSounds = ["audio/failure/dundundun.mp3", "audio/failure/1.mp3", "audio/failure/2.mp3", "audio/failure/3.mp3", "audio/failure/4.mp3", "audio/failure/5.mp3", "audio/failure/6.mp3", "audio/failure/7.mp3"]
 introSounds = ["audio/intro/dramaticintro.mp3", "audio/intro/halloweenimpact01.mp3", "audio/intro/halloweenimpact02.mp3", "audio/intro/halloweenimpact03.mp3", "audio/intro/halloweenimpact04.mp3", "audio/intro/halloweenimpact05.mp3", "audio/intro/bellofdeath.mp3"]
 
 def resize_image(event):
-    # Resises the image when required
+    # Resises the image to fit the window
     new_width = event.width
     new_height = event.height
     image = copy_of_image.resize((new_width, new_height))
@@ -24,20 +25,8 @@ def resize_image(event):
     label.image = photo
 
 def format_response(address, weather):
-    # Function which formats the weather information 
+    # Procedure which formats and displays the weather information 
     try:
-        def iconset(icon):
-            # Function which will get the icon and display it depending on the weather conditions
-            iconpath = f'2ndSetColorPNG/{icon}.png'
-            iconimage = Image.open(iconpath)
-            resizeIconImage = iconimage.resize((60,60))
-            global iconphoto
-            iconphoto = ImageTk.PhotoImage(resizeIconImage)
-            global iconlabel
-            iconlabel = tk.Label(second_frame, image = iconphoto)
-            iconlabel.place(relx=0.88, rely=0.5, anchor="center")
-            
-
         name = weather['address']
         resolvedAddress = weather['resolvedAddress'] 
         date = weather['days'][0]['datetime'] # Format YYYY-MM-DD
@@ -46,8 +35,6 @@ def format_response(address, weather):
         mintemp = weather['days'][0]['tempmin'] # In °C
         humidity = weather['days'][0]['humidity'] # In %
         windspeed = weather['days'][0]['windspeed'] # In mph
-        icon = weather['days'][0]['icon']
-
 
         # Ensuring that the text will fit on the screen.
         length = len(resolvedAddress)
@@ -72,6 +59,11 @@ def format_response(address, weather):
         dateYear = date[0:4]
         # Converting the date format to DD-MM-YYYY
         dateFormatted = dateDay + dateMonth + dateYear
+
+
+        # If these values return 0.0 or None then it will go to the except and display an error message to the user
+        if maxtemp == 0.0 and mintemp == 0.0 and humidity == None and windspeed == None:
+            raise Exception 
        
         if address == True:
             final_str = f'Location: {name}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
@@ -80,24 +72,19 @@ def format_response(address, weather):
 
         # Setting the label to the final_str
         label_below.configure(text=final_str)
-        iconset(icon)
     except:
-        iconlabel.destroy()
+        # Displaying an error message to user and playing failure sounds
         final_str = 'Sorry, there was a problem retrieving that information'
         label_below.configure(font=("Comic Sans MS bold", 14))
         label_below.configure(text=final_str)
         pygame.mixer.music.load(random.choice(failureSounds))
         pygame.mixer.music.play(loops=0)
 
-
-    return icon
-
 def get_weather(surprise, city, date):
-    print(city)
-    print(date)
     # Procedure which connects to the Visual Crossing Timeline API and stores the response in 'weather'
+
     try:
-        dateInt = int(date)
+        dateInt = int(date) # Making sure the user enters an integer for the date
     except:
         label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
         pygame.mixer.music.load(random.choice(failureSounds))
@@ -107,7 +94,7 @@ def get_weather(surprise, city, date):
 
     if city != "":
         try:
-            if dateInt < 1973 or dateInt > 2021:
+            if dateInt < 1973 or dateInt > 2021: # Validation on date
                 raise Exception
 
             weather_key = 'KZWGYHQU6JZUJ6VTKLAUDH68W'
@@ -140,7 +127,8 @@ def get_weather(surprise, city, date):
             apiQuery += "&key=" + weather_key # Finished api query
 
             response = requests.get(apiQuery)
-            weather = response.json()
+            weather = response.json() # Storing API response
+
             if surprise == False:
                 address = False
                 label_below['text'] = format_response(address, weather)
@@ -206,56 +194,56 @@ def get_weather(surprise, city, date):
                 four()
 
             # Randomly picks whether the ghosts go in a clockwise or anticlockwise direction
-            fns = [clockwise, anticlockwise]
-            random.choice(fns)()
+            chooseDirection = [clockwise, anticlockwise]
+            random.choice(chooseDirection)()
 
             pygame.mixer.music.load(random.choice(screamingSounds)) # Loading sounds
             pygame.mixer.music.play(loops=0) # Playing sound
 
         except:
-            iconlabel.destroy()
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
             pygame.mixer.music.load(random.choice(failureSounds))
             pygame.mixer.music.play(loops=0)
     
     elif city == "":
-            iconlabel.destroy()
             label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
             pygame.mixer.music.load(random.choice(failureSounds))
             pygame.mixer.music.play(loops=0)  
 
 def supriseMeProcessing():
-    location_entry.delete(0, 'end')
-    date_entry.delete(0, 'end')
+    # This procedure  reads in all the countries from the 'countries of the world.csv' file and then picks and stores a random country and date
+
+    location_entry.delete(0, 'end') # Removing user entered text from location entry box
+    date_entry.delete(0, 'end') # Removing user entered text from date entry box
     window.focus()
     pygame.mixer.music.load("audio/button/goreblood.mp3") # Load music
     pygame.mixer.music.play(loops=0) # Play music
-    # Function which reads in all the countries form the 'countries of the world.csv' file and then picks and stores a random country and date
     countriesList = []
     countriesFile = open("countries of the world.csv", "r")
     rows = csv.reader(countriesFile)
     for row in rows:
-        country = row[0]
-        countriesList.append(country)
+        country = row[0] 
+        countriesList.append(country) # Storing the data in countriesList
 
-    randomCountry = random.choice(countriesList)
-    randomDate = random.randint(1973, 2021)
+    randomCountry = random.choice(countriesList) # Randomly choosing a country
+    randomDate = random.randint(1973, 2021) # Choosing a random date
     surprise = True
     get_weather(surprise, randomCountry, randomDate)
 
 def mute_switch():
     # If the switch is checked the sounds will be muted if it is unchecked the sound effects will be hearable
-    value = switch.get()
-    
-    if value == 1:
+    text = audiobutton.text
+
+    if text == "Audio on":
         pygame.mixer.music.set_volume(0)
-        switchtext.configure(text="Audio off")
-    elif value == 0:
+        audiobutton.configure(text="Audio off")
+    
+    elif text == "Audio off":
         pygame.mixer.music.set_volume(1)
-        switchtext.configure(text="Audio on")
+        audiobutton.configure(text="Audio on")
 
 def setup():
-    # Function which sets up all of the entry boxes, buttons, frames, etc
+    # Procedure which sets up all of the entry boxes, buttons, frames, etc
 
     surprise = False
 
@@ -280,8 +268,8 @@ def setup():
     label_below = customtkinter.CTkLabel(second_frame, anchor="center", borderwidth=4, text="", text_font=("Comic Sans MS bold", 16))
     label_below.place(relwidth=1, relheight=1)
 
-    supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", text_font=("Comic Sans MS bold", 10), hover_color="#a589e8", border_width=2)
-    supriseme_button.place(relx=0.42, rely=0.08, relwidth=0.14, relheight=0.07)
+    supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", text_font=("Comic Sans MS bold", 10), hover_color="#a589e8", border_width=2, height=1, width=1)
+    supriseme_button.place(relx=0.56, rely=0.115, relwidth=0.14, relheight=0.07, anchor="center")
 
 
     ghostlabel1 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="nw", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
@@ -293,28 +281,14 @@ def setup():
     ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
     ghostlabel4.place(relx=0.815, rely=0.855) # Bottom right
 
+    audiobutton = customtkinter.CTkButton(window, text="Audio on", command=mute_switch, text_font=("Comic Sans MS bold", 10), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", hover_color="#a589e8", border_width=2, width=1, height=1)
+    audiobutton.place(relx=0.41, rely=0.115, anchor="center", relwidth=0.14, relheight=0.07)
 
-    #switchframe = customtkinter.CTkFrame(window, width=100, height=40, corner_radius=10)
-    #switchframe.place(relx=0.05, rely=0.17)
-    #switch = customtkinter.CTkSwitch(switchframe, text="", command=mute_switch, text_font=("Comic Sans MS bold", 11), button_color="#6c43cd", fg_color="#b8d2d4", button_hover_color="#a589e8", progress_color="#b8d2d4", height=17)
-    #switch.place(relx=0.23, rely=0.58, anchor="center")
-    #switchtext = customtkinter.CTkLabel(switchframe, text="Audio on", text_font=("Comic Sans MS bold", 10), width=10)
-    #switchtext.place(relx=0.68, rely=0.5, anchor="center")
-    switch = customtkinter.CTkSwitch(window, text="", command=mute_switch, text_font=("Comic Sans MS bold", 11), button_color="#6c43cd", fg_color="#b8d2d4", button_hover_color="#a589e8", progress_color="#9fb3b5", height=20, width=40, bg_color="#e88b2e", border_color="#ba91ff")
-    switch.place(relx=0.13, rely=0.19, anchor="center")
-    switchtext = customtkinter.CTkLabel(window, text="Audio on", text_font=("Comic Sans MS bold", 10), width=60, fg_color="#926ee6", bg_color="#f2993f", corner_radius=15)
-    switchtext.place(relx=0.13, rely=0.243, anchor="center")
-
-
-    return label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch, switchtext
+    return label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, audiobutton
 
 # Main Program
-
-
-
 pygame.mixer.init()
 
-# ADD an audio file if i want something to play on startup
 pygame.mixer.music.load(random.choice(introSounds))
 pygame.mixer.music.play(loops=0)
 
@@ -334,12 +308,13 @@ label = tk.Label(window, image = photo)
 label.bind('<Configure>', resize_image)
 label.pack(fill=tk.BOTH, expand = True)
 
+# Changes the icon of the window
 image50 = Image.open('img\ghost.png')
 photo50 = ImageTk.PhotoImage(image50)
 window.iconphoto(False,photo50)
 
-# Calls the setup function
-label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, switch, switchtext = setup()
+# Calls the setup procedure
+label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, audiobutton = setup()
 
-# Starts the program
+# Starts the program / tkinter window
 window.mainloop()
