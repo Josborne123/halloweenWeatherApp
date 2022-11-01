@@ -1,6 +1,4 @@
 # Importing all modules required
-from email.mime import audio
-from secrets import randbelow
 import tkinter as tk
 import customtkinter
 import requests
@@ -38,16 +36,17 @@ def format_response(address, weather):
 
         # Ensuring that the text will fit on the screen.
         length = len(resolvedAddress)
-        if length >= 43 and length <= 46:
+        if length == 43 or length == 44:
             label_below.configure(font=("Comic Sans MS bold", 14))
+        elif length ==45 or length == 46:
+            label_below.configure(font=("Comic Sans MS bold", 13))
         elif length <= 43:
             label_below.configure(font=("Comic Sans MS bold", 16))
         elif length >= 47 and length <= 52:
             label_below.configure(font=("Comic Sans MS bold", 13))
         elif length >= 53:
             label_below.configure(font=("Comic Sans MS bold", 10))
-
-
+        
         # Converting the first letter of the location name to a capital letter
         firstChar = ord(name[0:1])
         if firstChar > 97 and firstChar < 122:
@@ -60,15 +59,33 @@ def format_response(address, weather):
         # Converting the date format to DD-MM-YYYY
         dateFormatted = dateDay + dateMonth + dateYear
 
-
         # If these values return 0.0 or None then it will go to the except and display an error message to the user
-        if maxtemp == 0.0 and mintemp == 0.0 and humidity == None and windspeed == None:
+        if maxtemp == 0.0 or maxtemp == None and mintemp == 0.0 or mintemp == None and humidity == None and windspeed == None:
             raise Exception 
+
+        maxtemp = f'{maxtemp}°C'
+        mintemp = f'{mintemp}°C'
+        humidity = f'{humidity}%'
+        windspeed = f'{windspeed} mph'
+
+        # If there is no data available, changing the output to 'No data'
+        if conditions == "":
+            conditions = "No data"
+        if maxtemp == '0.0°C' or maxtemp == 'None°C':
+            maxtemp = "No data"
+        if mintemp == '0.0°C' or mintemp == 'None°C':
+            mintemp = "No data"
+        if humidity == 'None%' or humidity == '0.0%':
+            humidity = "No data"
+        if windspeed == 'None mph' or windspeed == '0.0 mph':
+            windspeed = "No data"
+
        
         if address == True:
-            final_str = f'Location: {name}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+            final_str = f'Location: {name}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp} \nMinimum Temperature: {mintemp} \nHumidity: {humidity} \nWind speed: {windspeed}'
+            
         elif address == False:
-            final_str = f'Location: {resolvedAddress}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp}°C \nMinimum Temperature: {mintemp}°C \nHumidity: {humidity}% \nWind speed: {windspeed} mph'
+            final_str = f'Location: {resolvedAddress}\nDate: {dateFormatted} \nConditions: {conditions}\nMaximum Temperature: {maxtemp} \nMinimum Temperature: {mintemp} \nHumidity: {humidity} \nWind speed: {windspeed}' 
 
         # Setting the label to the final_str
         label_below.configure(text=final_str)
@@ -86,7 +103,8 @@ def get_weather(surprise, city, date):
     try:
         dateInt = int(date) # Making sure the user enters an integer for the date
     except:
-        label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
+        label_below.configure(font=("Comic Sans MS bold", 16))
+        label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering different values.")
         pygame.mixer.music.load(random.choice(failureSounds))
         pygame.mixer.music.play(loops=0)
 
@@ -201,12 +219,14 @@ def get_weather(surprise, city, date):
             pygame.mixer.music.play(loops=0) # Playing sound
 
         except:
-            label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
+            label_below.configure(font=("Comic Sans MS bold", 16))
+            label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering different values.")
             pygame.mixer.music.load(random.choice(failureSounds))
             pygame.mixer.music.play(loops=0)
     
     elif city == "":
-            label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering your values again.")
+            label_below.configure(font=("Comic Sans MS bold", 16))
+            label_below.configure(text="Sorry, what you have entered doesn't work!\nPlease try entering different values.")
             pygame.mixer.music.load(random.choice(failureSounds))
             pygame.mixer.music.play(loops=0)  
 
@@ -247,8 +267,8 @@ def setup():
 
     surprise = False
 
-    info_label = customtkinter.CTkLabel(window, text="Find the weather for any location, from 1973 onwards", text_font=("Comic Sans MS bold", 14), text_color="white", bg_color="#f2993f")
-    info_label.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
+    info_label = customtkinter.CTkLabel(window, text="Find the weather on Halloween for any location, from 1973 onwards", text_font=("Comic Sans MS bold", 13), text_color="white", bg_color="#f2993f")
+    info_label.place(relx=0.495, rely=0.3, anchor=tk.CENTER)
 
     location_entry = customtkinter.CTkEntry(window, placeholder_text="Location", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
     location_entry.place(relx=0.20, rely=0.16, relwidth=0.18, relheight=0.1)
