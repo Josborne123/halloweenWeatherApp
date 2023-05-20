@@ -1,5 +1,7 @@
 # halloweenWeatherApp
 
+N.B - With the latest version of customtkinter, this code is no longer correct. There are only a few errors to correct.
+
 This is a weather GUI built with tkinter and customtkinter for J.P Morgan halloween themed project coding competition 2022
 
 This application will take a location and a year and return the weather data on halloween in that place on that year.
