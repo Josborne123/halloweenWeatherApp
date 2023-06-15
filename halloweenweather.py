@@ -9,7 +9,7 @@ import pygame
 
 # Defining sounds arrays
 buttonSounds = ["audio/button/breezeofblood.mp3", "audio/button/goreblood.mp3", "audio/button/riptear.mp3", "audio/button/veryloudsplat.mp3"]
-screamingSounds = ["audio\screamingsounds\demonic-woman-scream-6333.mp3", "audio\screamingsounds\evil-shreik-45560.mp3", "audio\screamingsounds\girl_scream_shortwav-14510.mp3", "audio\screamingsounds\man-scream-memes-121085.mp3", "audio\screamingsounds\panic-stricken-screaming-1-6880.mp3", "audio\screamingsounds\witch-laugh-95203.mp3", "audio\screamingsounds\witchlaughter-1-100652.mp3"]
+screamingSounds = ["audio/screamingsounds/demonic-woman-scream-6333.mp3", "audio/screamingsounds/evil-shreik-45560.mp3", "audio/screamingsounds/girl_scream_shortwav-14510.mp3", "audio/screamingsounds/man-scream-memes-121085.mp3", "audio/screamingsounds/panic-stricken-screaming-1-6880.mp3", "audio/screamingsounds/witch-laugh-95203.mp3", "audio/screamingsounds/witchlaughter-1-100652.mp3"]
 failureSounds = ["audio/failure/dundundun.mp3", "audio/failure/1.mp3", "audio/failure/2.mp3", "audio/failure/3.mp3", "audio/failure/4.mp3", "audio/failure/5.mp3", "audio/failure/6.mp3", "audio/failure/7.mp3"]
 introSounds = ["audio/intro/dramaticintro.mp3", "audio/intro/halloweenimpact01.mp3", "audio/intro/halloweenimpact02.mp3", "audio/intro/halloweenimpact03.mp3", "audio/intro/halloweenimpact04.mp3", "audio/intro/halloweenimpact05.mp3", "audio/intro/bellofdeath.mp3"]
 
@@ -252,7 +252,7 @@ def supriseMeProcessing():
 
 def mute_switch():
     # If the switch is checked the sounds will be muted if it is unchecked the sound effects will be hearable
-    text = audiobutton.text
+    text = audiobutton.cget("text")
 
     if text == "Audio on":
         pygame.mixer.music.set_volume(0)
@@ -267,41 +267,41 @@ def setup():
 
     surprise = False
 
-    info_label = customtkinter.CTkLabel(window, text="Find the weather on Halloween for any location, from 1973 onwards", text_font=("Comic Sans MS bold", 13), text_color="white", bg_color="#f2993f")
+    info_label = customtkinter.CTkLabel(window, text="Find the weather on Halloween for any location. Year must be after 1973 and before 2021.", font=("Comic Sans MS bold", 13), text_color="white", bg_color="#f2993f")
     info_label.place(relx=0.495, rely=0.3, anchor=tk.CENTER)
 
-    location_entry = customtkinter.CTkEntry(window, placeholder_text="Location", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
+    location_entry = customtkinter.CTkEntry(window, placeholder_text="Location", placeholder_text_color="orange", font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
     location_entry.place(relx=0.20, rely=0.16, relwidth=0.18, relheight=0.1)
     location_entry.bind("<Return>", (lambda event: get_weather(surprise, location_entry.get(), date_entry.get())))
 
-    date_entry = customtkinter.CTkEntry(window,  placeholder_text="Year", placeholder_text_color="orange", text_font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
+    date_entry = customtkinter.CTkEntry(window,  placeholder_text="Year", placeholder_text_color="orange", font=("Comic Sans MS italic", 15), corner_radius=15, bg_color="#f2993f")
     date_entry.place(relx=0.40, rely=0.16, relwidth=0.18, relheight=0.1)
     date_entry.bind("<Return>", (lambda event: get_weather(surprise, location_entry.get(), date_entry.get())))
 
 
-    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(surprise, location_entry.get(), date_entry.get()), text_font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", hover_color="#a589e8", border_width=2)
+    enter_button = customtkinter.CTkButton(window, text="Enter", command=lambda: get_weather(surprise, location_entry.get(), date_entry.get()), font=("Comic Sans MS bold", 15), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", hover_color="#a589e8", border_width=2)
     enter_button.place(relx=0.60, rely=0.16, relwidth=0.18, relheight=0.1)
 
-    second_frame = customtkinter.CTkFrame(window, bg_color="#eb6835", bd=4)
+    second_frame = customtkinter.CTkFrame(window, bg_color="#eb6835", border_width=4)
     second_frame.place(relx=0.125, rely=0.35, relwidth=0.75, relheight=0.6)
 
-    label_below = customtkinter.CTkLabel(second_frame, anchor="center", borderwidth=4, text="", text_font=("Comic Sans MS bold", 16))
+    label_below = customtkinter.CTkLabel(second_frame, anchor="center", text="", font=("Comic Sans MS bold", 16))
     label_below.place(relwidth=1, relheight=1)
 
-    supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", text_font=("Comic Sans MS bold", 10), hover_color="#a589e8", border_width=2, height=1, width=1)
+    supriseme_button = customtkinter.CTkButton(window, command=lambda: supriseMeProcessing(), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", text="Suprise Me!", font=("Comic Sans MS bold", 10), hover_color="#a589e8", border_width=2, height=1, width=1)
     supriseme_button.place(relx=0.56, rely=0.115, relwidth=0.14, relheight=0.07, anchor="center")
 
 
-    ghostlabel1 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="nw", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
+    ghostlabel1 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="nw", font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
     ghostlabel1.place(relx=0.135, rely=0.36) # Top left
-    ghostlabel2 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="ne", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
+    ghostlabel2 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="ne", font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
     ghostlabel2.place(relx=0.815, rely=0.36) # Top right
-    ghostlabel3 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="sw", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
+    ghostlabel3 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="sw", font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
     ghostlabel3.place(relx=0.135, rely=0.855) # Bottom left
-    ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", text_font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
+    ghostlabel4 = customtkinter.CTkLabel(window, text="\U0001F47B", anchor="se", font=("Comic Sans MS bold", 20), bg_color="#292929", width=5)
     ghostlabel4.place(relx=0.815, rely=0.855) # Bottom right
 
-    audiobutton = customtkinter.CTkButton(window, text="Audio on", command=mute_switch, text_font=("Comic Sans MS bold", 10), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", hover_color="#a589e8", border_width=2, width=1, height=1)
+    audiobutton = customtkinter.CTkButton(window, text="Audio on", command=mute_switch, font=("Comic Sans MS bold", 10), corner_radius=15, bg_color="#f2993f", fg_color="#6c43cd", hover_color="#a589e8", border_width=2, width=1, height=1)
     audiobutton.place(relx=0.41, rely=0.115, anchor="center", relwidth=0.14, relheight=0.07)
 
     return label_below, second_frame, surprise, location_entry, date_entry, ghostlabel1, ghostlabel2, ghostlabel3, ghostlabel4, audiobutton
@@ -321,7 +321,7 @@ customtkinter.set_default_color_theme("dark-blue")
 
 ## Image created by anjarshevtian on Vecteezy
 # Sets up the image
-image = Image.open('img\halloween.jpg')
+image = Image.open('img/halloween.jpg')
 copy_of_image = image.copy()
 photo = ImageTk.PhotoImage(image)
 label = tk.Label(window, image = photo)
@@ -329,7 +329,7 @@ label.bind('<Configure>', resize_image)
 label.pack(fill=tk.BOTH, expand = True)
 
 # Changes the icon of the window
-image50 = Image.open('img\ghost.png')
+image50 = Image.open('img/ghost.png')
 photo50 = ImageTk.PhotoImage(image50)
 window.iconphoto(False,photo50)
 
